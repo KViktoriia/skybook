@@ -324,6 +324,75 @@
 
     </main>
 
+    <!-- Футер сайту -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section about">
+                <a href="#" class="nav-brand" style="margin-bottom: 15px; display: inline-flex;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); margin-right: 8px;">
+                        <path d="M22 2 15 22 11 13 2 9Z"/>
+                        <path d="M22 2 11 13"/>
+                    </svg>
+                    SkyBook
+                </a>
+                <p>Ваша надійна платформа для пошуку, швидкого бронювання та безпечної оплати авіаквитків онлайн. Подорожуйте світом з комфортом.</p>
+            </div>
+            <div class="footer-section links">
+                <h4>Корисні посилання</h4>
+                <ul>
+                    <li><a href="#" onclick="switchActiveTab('view-search')">Пошук рейсів</a></li>
+                    <li><a href="#" id="link-footer-dashboard">Особистий кабінет</a></li>
+                    <li><a href="#" id="link-about-modal">Про компанію</a></li>
+                    <li><a href="#" id="link-contacts-modal">Контакти підтримки</a></li>
+                </ul>
+            </div>
+            <div class="footer-section contacts">
+                <h4>Контакти</h4>
+                <p style="margin-bottom: 8px;">📞 +380 (44) 123-45-67 (Гаряча лінія)</p>
+                <p style="margin-bottom: 8px;">✉️ support@skybook.ua</p>
+                <p>📍 м. Київ, вул. Авіаційна, 12, офіс 404</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 SkyBook. Усі права захищено. | Розроблено в межах дисципліни ТСПП</p>
+        </div>
+    </footer>
+
+    <!-- Модальне вікно 7: Про компанію та контакти -->
+    <div class="modal-overlay" id="modal-info" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+        <div class="modal-container glass-card" style="max-width: 550px;">
+            <div class="modal-header">
+                <h2 id="info-modal-title">Про SkyBook</h2>
+                <button class="modal-close" id="btn-close-info-modal" aria-label="Закрити">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="info-modal-content" style="display: flex; flex-direction: column; gap: 20px; font-size: 14px; line-height: 1.6;">
+                <div id="info-about-section">
+                    <p><strong>SkyBook</strong> — це технологічний демонстратор авіаційного порталу нового покоління. Наш сервіс пропонує:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Миттєве бронювання місць на інтерактивних схемах літаків;</li>
+                        <li>Швидкий пасажирський onboarding через симуляцію держсервісу Дія API;</li>
+                        <li>Інтелектуальну систему оцінки ризиків та запобігання фроду (DevSecOps);</li>
+                        <li>Сучасний дизайн на базі технології Glassmorphism.</li>
+                    </ul>
+                </div>
+                <div id="info-contacts-section" style="border-top: 1px dashed var(--border-glass-focus); padding-top: 15px;">
+                    <h3>Контактний центр підтримки</h3>
+                    <p style="margin-top: 8px;">Наші спеціалісти готові допомогти вам 24/7 з будь-ких питань бронювання чи повернення коштів:</p>
+                    <div style="margin-top: 12px; display: grid; gap: 8px;">
+                        <div>📞 <strong>Телефон:</strong> +380 (44) 123-45-67 (безкоштовно з мобільних в межах України)</div>
+                        <div>✉️ <strong>Електронна пошта:</strong> support@skybook.ua</div>
+                        <div>📍 <strong>Головний офіс:</strong> м. Київ, вул. Авіаційна, 12, офіс 404</div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 25px; display: flex; justify-content: flex-end;">
+                <button class="btn btn-primary" id="btn-close-info-view">Зрозуміло</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальне вікно 1: Інтерактивна схема літака та бронювання (Крок 1) -->
     <div class="modal-overlay" id="modal-seat-selector" role="dialog" aria-modal="true" aria-labelledby="seat-modal-title">
         <div class="modal-container glass-card">

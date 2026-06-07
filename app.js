@@ -1498,3 +1498,58 @@ currentSearch.destination = "CDG";
 currentSearch.date = today;
 renderFlights();
 updateAuthUI();
+
+// --- 15. Логіка вікна Про компанію та Контакти (Footer Info Modals) ---
+const modalInfo = document.getElementById("modal-info");
+const linkAboutModal = document.getElementById("link-about-modal");
+const linkContactsModal = document.getElementById("link-contacts-modal");
+const btnCloseInfoModal = document.getElementById("btn-close-info-modal");
+const btnCloseInfoView = document.getElementById("btn-close-info-view");
+const linkFooterDashboard = document.getElementById("link-footer-dashboard");
+
+const openInfoModal = (mode) => {
+    const title = document.getElementById("info-modal-title");
+    const aboutSec = document.getElementById("info-about-section");
+    const contactsSec = document.getElementById("info-contacts-section");
+    
+    if (mode === "about") {
+        title.innerText = "Про компанію SkyBook";
+        aboutSec.style.display = "block";
+        contactsSec.style.display = "none";
+    } else {
+        title.innerText = "Контакти підтримки";
+        aboutSec.style.display = "none";
+        contactsSec.style.display = "block";
+    }
+    modalInfo.classList.add("active");
+};
+
+if (linkAboutModal) {
+    linkAboutModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        openInfoModal("about");
+    });
+}
+
+if (linkContactsModal) {
+    linkContactsModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        openInfoModal("contacts");
+    });
+}
+
+if (btnCloseInfoModal) btnCloseInfoModal.addEventListener("click", () => modalInfo.classList.remove("active"));
+if (btnCloseInfoView) btnCloseInfoView.addEventListener("click", () => modalInfo.classList.remove("active"));
+
+if (linkFooterDashboard) {
+    linkFooterDashboard.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (currentUser) {
+            switchActiveTab("view-dashboard");
+        } else {
+            modalLogin.classList.add("active");
+            showNotification("Будь ласка, авторизуйтесь для входу в кабінет", "warning");
+        }
+    });
+}
+
