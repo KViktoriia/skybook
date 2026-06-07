@@ -1381,43 +1381,53 @@ select option {
 @media (max-width: 768px) {
     /* Навігаційна панель */
     .navbar {
-        padding: 10px 12px;
-        gap: 8px;
+        flex-wrap: wrap !important;
+        padding: 12px 16px !important;
+        gap: 12px !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         background: rgba(15, 23, 42, 0.98) !important;
     }
     
     .nav-brand {
-        font-size: 18px;
-        gap: 6px;
-    }
-    
-    /* Приховуємо текст "SkyBook" на дуже вузьких екранах, залишаючи тільки логотип */
-    .nav-brand {
-        font-size: 0;
+        order: 1 !important;
+        font-size: 20px !important;
+        gap: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
     }
     .nav-brand svg {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
+    }
+    
+    .nav-actions {
+        order: 2 !important;
+        gap: 8px !important;
     }
     
     .nav-menu {
-        gap: 4px;
+        order: 3 !important;
+        width: 100% !important;
+        justify-content: center !important;
+        border-top: 1px dashed var(--border-glass-focus) !important;
+        padding-top: 10px !important;
+        margin: 0 !important;
+        gap: 6px !important;
     }
     
-    /* Приховуємо текст кнопок табів, залишаємо лише іконки для економії простору */
+    /* Зручні кнопки навігації на мобільних (поміщаються завдяки окремому рядку) */
     .nav-item button {
-        padding: 8px 10px;
-        gap: 0;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        gap: 6px !important;
     }
     .nav-item button span {
-        display: none !important;
+        display: inline !important; /* Показуємо текст */
     }
-    
     .nav-item button svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         margin: 0;
     }
     
@@ -1427,18 +1437,18 @@ select option {
     }
     
     .auth-user-profile {
-        padding: 4px;
-        gap: 4px;
+        padding: 4px !important;
+        gap: 4px !important;
     }
     
-    /* Кнопки входу для гостей робимо меншими */
+    /* Кнопки входу для гостей робимо компактнішими */
     .auth-guest-buttons {
-        gap: 4px;
+        gap: 6px !important;
     }
     
     .auth-guest-buttons .btn-sm {
-        padding: 6px 8px;
-        font-size: 11px;
+        padding: 6px 10px !important;
+        font-size: 12px !important;
     }
 
     /* Оптимізація продуктивності: вимикаємо backdrop-filter для плавної прокрутки на мобільних */
@@ -1463,17 +1473,17 @@ select option {
     
     /* Схема салону літака */
     .seat-booking-flow {
-        grid-template-columns: 1fr !important; /* Робимо в один стовпчик на мобілках */
+        grid-template-columns: 1fr !important;
         gap: 20px;
     }
     
     .cabin-container {
         padding: 20px 8px;
-        max-height: 380px; /* Обмежуємо висоту на маленьких екранах */
+        max-height: 380px;
     }
     
     .seating-chart {
-        max-width: 290px; /* Звужуємо сітку літака */
+        max-width: 290px;
         gap: 6px;
         margin: 0 auto;
     }
@@ -1483,7 +1493,7 @@ select option {
     }
     
     .seat {
-        width: 26px; /* Зменшуємо розмір сидіння з 30px до 26px */
+        width: 26px;
         height: 26px;
         font-size: 8px;
         border-radius: 4px;
@@ -1494,7 +1504,7 @@ select option {
     }
     
     .aisle {
-        width: 14px; /* Зменшуємо ширину проходу з 24px до 14px */
+        width: 14px;
     }
     
     .seat-row-num {
@@ -1512,7 +1522,6 @@ select option {
         margin: 10px 0;
     }
     
-    /* Легенда під схемою */
     .legend {
         gap: 8px;
         flex-wrap: wrap;
@@ -1584,15 +1593,17 @@ select option {
     gap: 10px;
 }
 
-.footer-section ul li a {
-    color: var(--text-secondary);
+.footer-section ul li a,
+.footer-section ul li a:visited,
+.footer-section ul li a:active {
+    color: var(--text-secondary) !important;
     text-decoration: none;
     font-size: 13px;
     transition: var(--transition-fast);
 }
 
 .footer-section ul li a:hover {
-    color: var(--primary);
+    color: var(--primary) !important;
     padding-left: 4px;
 }
 
@@ -1610,18 +1621,42 @@ select option {
 }
 
 @media (max-width: 768px) {
+    .footer {
+        padding: 30px 0 15px 0 !important;
+        margin-top: 50px !important;
+    }
+
     .footer-container {
-        grid-template-columns: 1fr;
-        gap: 30px;
-        text-align: center;
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+        text-align: left !important;
+        padding: 0 24px !important;
+    }
+    
+    .footer-section {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .footer-section h4 {
+        margin-bottom: 12px !important;
+        margin-top: 10px !important;
+        color: var(--primary) !important;
+        font-size: 15px !important;
     }
     
     .footer-section ul {
-        align-items: center;
+        align-items: flex-start !important;
     }
     
     .footer-section ul li a:hover {
         padding-left: 0;
+    }
+    
+    .footer-bottom {
+        margin-top: 25px !important;
+        padding-top: 15px !important;
     }
 }
 
