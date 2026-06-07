@@ -357,6 +357,12 @@ const INIT_USERS = [
 let users = getDbTable("skybook_users", INIT_USERS);
 
 // --- 2. Системний стан (State) ---
+// Гарантуємо, що при кожному новому відкритті вкладки/сесії користувач стартує як незареєстрований гість
+if (!sessionStorage.getItem("skybook_session_active")) {
+    localStorage.removeItem("skybook_current_user");
+    sessionStorage.setItem("skybook_session_active", "true");
+}
+
 let currentUser = null;
 const storedUser = localStorage.getItem("skybook_current_user");
 if (storedUser) {

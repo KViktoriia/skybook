@@ -1383,6 +1383,9 @@ select option {
     .navbar {
         padding: 10px 12px;
         gap: 8px;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(15, 23, 42, 0.98) !important;
     }
     
     .nav-brand {
@@ -1438,9 +1441,19 @@ select option {
         font-size: 11px;
     }
 
+    /* Оптимізація продуктивності: вимикаємо backdrop-filter для плавної прокрутки на мобільних */
+    .glass-card {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(22, 30, 49, 0.98) !important;
+    }
+
     /* Модальні вікна */
     .modal-overlay {
         padding: 10px;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(8, 12, 23, 0.96) !important;
     }
     
     .modal-container {
