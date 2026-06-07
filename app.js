@@ -361,9 +361,6 @@ let currentUser = null;
 const storedUser = localStorage.getItem("skybook_current_user");
 if (storedUser) {
     currentUser = JSON.parse(storedUser);
-} else {
-    currentUser = users[0]; // По дефолту пасажир Вікторія
-    localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
 }
 
 let currentSearch = { origin: "", destination: "", date: "", class: "ECONOMY" };

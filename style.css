@@ -1377,3 +1377,156 @@ select option {
     box-shadow: 0 0 0 2px var(--primary-glow);
 }
 
+/* --- Адаптивний дизайн під мобільні пристрої (Mobile Responsive Fixes) --- */
+@media (max-width: 768px) {
+    /* Навігаційна панель */
+    .navbar {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+    
+    .nav-brand {
+        font-size: 18px;
+        gap: 6px;
+    }
+    
+    /* Приховуємо текст "SkyBook" на дуже вузьких екранах, залишаючи тільки логотип */
+    .nav-brand {
+        font-size: 0;
+    }
+    .nav-brand svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .nav-menu {
+        gap: 4px;
+    }
+    
+    /* Приховуємо текст кнопок табів, залишаємо лише іконки для економії простору */
+    .nav-item button {
+        padding: 8px 10px;
+        gap: 0;
+    }
+    .nav-item button span {
+        display: none !important;
+    }
+    
+    .nav-item button svg {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+    }
+    
+    /* Приховуємо деталі профілю, залишаємо тільки аватарку та логаут */
+    .user-details-nav {
+        display: none !important;
+    }
+    
+    .auth-user-profile {
+        padding: 4px;
+        gap: 4px;
+    }
+    
+    /* Кнопки входу для гостей робимо меншими */
+    .auth-guest-buttons {
+        gap: 4px;
+    }
+    
+    .auth-guest-buttons .btn-sm {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    /* Модальні вікна */
+    .modal-overlay {
+        padding: 10px;
+    }
+    
+    .modal-container {
+        padding: 16px !important;
+        max-height: 95vh;
+    }
+    
+    /* Схема салону літака */
+    .seat-booking-flow {
+        grid-template-columns: 1fr !important; /* Робимо в один стовпчик на мобілках */
+        gap: 20px;
+    }
+    
+    .cabin-container {
+        padding: 20px 8px;
+        max-height: 380px; /* Обмежуємо висоту на маленьких екранах */
+    }
+    
+    .seating-chart {
+        max-width: 290px; /* Звужуємо сітку літака */
+        gap: 6px;
+        margin: 0 auto;
+    }
+    
+    .seat-row {
+        gap: 2px;
+    }
+    
+    .seat {
+        width: 26px; /* Зменшуємо розмір сидіння з 30px до 26px */
+        height: 26px;
+        font-size: 8px;
+        border-radius: 4px;
+    }
+    
+    .seat-group {
+        gap: 4px;
+    }
+    
+    .aisle {
+        width: 14px; /* Зменшуємо ширину проходу з 24px до 14px */
+    }
+    
+    .seat-row-num {
+        width: 14px;
+        font-size: 9px;
+    }
+    
+    .cabin-nose {
+        width: 180px;
+        height: 50px;
+        margin-bottom: 15px;
+    }
+    
+    .cabin-divider {
+        margin: 10px 0;
+    }
+    
+    /* Легенда під схемою */
+    .legend {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 15px;
+    }
+    
+    .legend-item {
+        font-size: 10px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Додаткове звуження для зовсім маленьких телефонів */
+    .seating-chart {
+        max-width: 265px;
+    }
+    .seat {
+        width: 24px;
+        height: 24px;
+        font-size: 7px;
+    }
+    .aisle {
+        width: 8px;
+    }
+    .seat-row-num {
+        width: 12px;
+    }
+}
+
