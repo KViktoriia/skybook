@@ -1,5 +1,6 @@
 // SkyBook Flight Booking Platform - Core JS Logic
 // Persists database state in localStorage
+// Feature: Booking enhancements implementation for Lab 13-14 (Git Flow & DevOps)
 
 // Допоміжна функція для динамічного вирахування дат рейсів
 const dPlus = (days, time) => {
