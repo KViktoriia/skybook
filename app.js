@@ -1203,6 +1203,7 @@ function adminCancelBooking(bookingId) {
 
 // --- 13. Управління навігацією та вкладками відповідно до прав ролей ---
 function switchActiveTab(targetViewId) {
+    window.scrollTo({ top: 0, behavior: "instant" });
     const activeTabButton = document.querySelector(`.nav-menu button[aria-controls="${targetViewId}"]`);
     if (activeTabButton) {
         // Очищуємо активний клас у всіх кнопок навігації в DOM
@@ -1352,26 +1353,66 @@ if (btnLogout) {
 // Швидкий вхід в модалці
 if (btnQuickPassenger) {
     btnQuickPassenger.addEventListener("click", () => {
-        const u = users.find(usr => usr.role === "passenger");
-        if (u) {
-            currentUser = u;
-            localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
-            modalLogin.classList.remove("active");
-            showNotification(`Авторизовано як пасажир: ${u.firstName} ${u.lastName}`, "success");
-            updateAuthUI();
+        let u = users.find(usr => usr.email.toLowerCase() === "v.kryvoruchko@skybook.ua");
+        if (!u) {
+            u = {
+                email: "v.kryvoruchko@skybook.ua",
+                password: "pass123",
+                firstName: "Viktoriia",
+                lastName: "Kryvoruchko",
+                passport: "FT123456",
+                role: "passenger",
+                status: "Gold"
+            };
+            users.push(u);
+            saveDbTable("skybook_users", users);
         }
+        
+        u.role = "passenger"; // Скидаємо до пасажира для входу
+        currentUser = u;
+        localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
+        
+        const userIndex = users.findIndex(usr => usr.email.toLowerCase() === u.email.toLowerCase());
+        if (userIndex !== -1) {
+            users[userIndex].role = "passenger";
+            saveDbTable("skybook_users", users);
+        }
+        
+        modalLogin.classList.remove("active");
+        showNotification(`Авторизовано як пасажир: ${u.firstName} ${u.lastName}`, "success");
+        updateAuthUI();
     });
 }
 if (btnQuickAdmin) {
     btnQuickAdmin.addEventListener("click", () => {
-        const u = users.find(usr => usr.role === "admin");
-        if (u) {
-            currentUser = u;
-            localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
-            modalLogin.classList.remove("active");
-            showNotification(`Авторизовано як адміністратор`, "success");
-            updateAuthUI();
+        let u = users.find(usr => usr.email.toLowerCase() === "admin@skybook.ua");
+        if (!u) {
+            u = {
+                email: "admin@skybook.ua",
+                password: "admin123",
+                firstName: "Oleksandr",
+                lastName: "Admin",
+                passport: "AD999999",
+                role: "admin",
+                status: "Staff"
+            };
+            users.push(u);
+            saveDbTable("skybook_users", users);
         }
+        
+        u.role = "admin"; // Скидаємо до адміна для входу
+        currentUser = u;
+        localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
+        
+        const userIndex = users.findIndex(usr => usr.email.toLowerCase() === u.email.toLowerCase());
+        if (userIndex !== -1) {
+            users[userIndex].role = "admin";
+            saveDbTable("skybook_users", users);
+        }
+        
+        modalLogin.classList.remove("active");
+        showNotification(`Авторизовано як адміністратор`, "success");
+        updateAuthUI();
     });
 }
 
