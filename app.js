@@ -300,7 +300,10 @@ const INIT_TRANSACTIONS = [
     { id: "tx_102", bookingId: "b2", amount: 2400, fraudScore: 22, status: "APPROVED", timestamp: "2026-06-06T14:19:50Z" }
 ];
 
-// Завантаження/Ініціалізація даних з localStorage
+// URL-адреса єдиної хмарної бази даних (JSON Blob API)
+const DB_BLOB_URL = "https://jsonblob.com/api/jsonBlob/019ea6c3-6ee3-74f4-8636-f987cd1b03bb";
+
+// Завантаження/Ініціалізація даних з localStorage (як локальний кеш)
 function getDbTable(tableName, fallbackData) {
     if (tableName === "skybook_flights") {
         const stored = localStorage.getItem(tableName);
@@ -308,7 +311,6 @@ function getDbTable(tableName, fallbackData) {
             try {
                 const parsed = JSON.parse(stored);
                 if (parsed.length <= 5) {
-                    // Оновлення до розширеного списку рейсів
                     localStorage.setItem(tableName, JSON.stringify(fallbackData));
                     return fallbackData;
                 }
@@ -321,10 +323,6 @@ function getDbTable(tableName, fallbackData) {
         localStorage.setItem(tableName, JSON.stringify(fallbackData));
     }
     return JSON.parse(localStorage.getItem(tableName));
-}
-
-function saveDbTable(tableName, data) {
-    localStorage.setItem(tableName, JSON.stringify(data));
 }
 
 let flights = getDbTable("skybook_flights", INIT_FLIGHTS);
@@ -355,6 +353,90 @@ const INIT_USERS = [
     }
 ];
 let users = getDbTable("skybook_users", INIT_USERS);
+
+// Асинхронне збереження всієї бази даних у хмару
+async function saveFullDatabaseToCloud() {
+    const database = {
+        users,
+        flights,
+        bookings,
+        blacklist,
+        transactions
+    };
+    try {
+        const response = await fetch(DB_BLOB_URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(database)
+        });
+        if (!response.ok) throw new Error("Cloud DB PUT failed");
+    } catch (err) {
+        console.error("Помилка синхронізації бази даних з хмарою:", err);
+    }
+}
+
+function saveDbTable(tableName, data) {
+    if (tableName === "skybook_users") users = data;
+    else if (tableName === "skybook_flights") flights = data;
+    else if (tableName === "skybook_bookings") bookings = data;
+    else if (tableName === "skybook_blacklist") blacklist = data;
+    else if (tableName === "skybook_transactions") transactions = data;
+
+    localStorage.setItem(tableName, JSON.stringify(data));
+    saveFullDatabaseToCloud();
+}
+
+// Завантаження найсвіжіших даних із хмари при старті
+async function loadDatabaseFromCloud() {
+    try {
+        const response = await fetch(DB_BLOB_URL);
+        if (!response.ok) throw new Error("Cloud DB GET failed");
+        const cloudDb = await response.json();
+        
+        if (cloudDb && cloudDb.users && cloudDb.flights && cloudDb.bookings && cloudDb.transactions) {
+            users = cloudDb.users;
+            flights = cloudDb.flights;
+            bookings = cloudDb.bookings;
+            transactions = cloudDb.transactions;
+            if (cloudDb.blacklist) blacklist = cloudDb.blacklist;
+            
+            localStorage.setItem("skybook_users", JSON.stringify(users));
+            localStorage.setItem("skybook_flights", JSON.stringify(flights));
+            localStorage.setItem("skybook_bookings", JSON.stringify(bookings));
+            localStorage.setItem("skybook_transactions", JSON.stringify(transactions));
+            localStorage.setItem("skybook_blacklist", JSON.stringify(blacklist));
+            
+            // Якщо сесія активна, оновлюємо поточного користувача за поштою (на випадок зміни паролю/ролі)
+            if (currentUser) {
+                const refreshedUser = users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+                if (refreshedUser) {
+                    currentUser = refreshedUser;
+                    localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
+                }
+            }
+            
+            updateAuthUI();
+            
+            // Оновлюємо поточне представлення вкладки, якщо потрібно
+            const activeTabButton = document.querySelector(".nav-menu li.active button");
+            if (activeTabButton) {
+                const targetViewId = activeTabButton.getAttribute("aria-controls");
+                if (targetViewId === "view-admin") {
+                    renderAdminDashboard();
+                } else if (targetViewId === "view-dashboard") {
+                    renderPassengerDashboard();
+                }
+            }
+        }
+    } catch (err) {
+        console.warn("Не вдалося завантажити базу даних з хмари, використовується локальний кеш:", err);
+    }
+}
+
+loadDatabaseFromCloud();
 
 // --- 2. Системний стан (State) ---
 // Гарантуємо, що при кожному новому відкритті вкладки/сесії користувач стартує як незареєстрований гість
@@ -1317,10 +1399,6 @@ const btnCloseRegister = document.getElementById("btn-close-register-modal");
 const linkToRegister = document.getElementById("link-to-register");
 const linkToLogin = document.getElementById("link-to-login");
 const btnLogout = document.getElementById("btn-logout");
-
-const btnQuickPassenger = document.getElementById("btn-quick-passenger");
-const btnQuickAdmin = document.getElementById("btn-quick-admin");
-
 if (btnOpenLogin) btnOpenLogin.addEventListener("click", () => modalLogin.classList.add("active"));
 if (btnOpenRegister) btnOpenRegister.addEventListener("click", () => modalRegister.classList.add("active"));
 if (btnCloseLogin) btnCloseLogin.addEventListener("click", () => modalLogin.classList.remove("active"));
@@ -1346,72 +1424,6 @@ if (btnLogout) {
         currentUser = null;
         localStorage.removeItem("skybook_current_user");
         showNotification("Ви вийшли з акаунту", "warning");
-        updateAuthUI();
-    });
-}
-
-// Швидкий вхід в модалці
-if (btnQuickPassenger) {
-    btnQuickPassenger.addEventListener("click", () => {
-        let u = users.find(usr => usr.email.toLowerCase() === "v.kryvoruchko@skybook.ua");
-        if (!u) {
-            u = {
-                email: "v.kryvoruchko@skybook.ua",
-                password: "pass123",
-                firstName: "Viktoriia",
-                lastName: "Kryvoruchko",
-                passport: "FT123456",
-                role: "passenger",
-                status: "Gold"
-            };
-            users.push(u);
-            saveDbTable("skybook_users", users);
-        }
-        
-        u.role = "passenger"; // Скидаємо до пасажира для входу
-        currentUser = u;
-        localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
-        
-        const userIndex = users.findIndex(usr => usr.email.toLowerCase() === u.email.toLowerCase());
-        if (userIndex !== -1) {
-            users[userIndex].role = "passenger";
-            saveDbTable("skybook_users", users);
-        }
-        
-        modalLogin.classList.remove("active");
-        showNotification(`Авторизовано як пасажир: ${u.firstName} ${u.lastName}`, "success");
-        updateAuthUI();
-    });
-}
-if (btnQuickAdmin) {
-    btnQuickAdmin.addEventListener("click", () => {
-        let u = users.find(usr => usr.email.toLowerCase() === "admin@skybook.ua");
-        if (!u) {
-            u = {
-                email: "admin@skybook.ua",
-                password: "admin123",
-                firstName: "Oleksandr",
-                lastName: "Admin",
-                passport: "AD999999",
-                role: "admin",
-                status: "Staff"
-            };
-            users.push(u);
-            saveDbTable("skybook_users", users);
-        }
-        
-        u.role = "admin"; // Скидаємо до адміна для входу
-        currentUser = u;
-        localStorage.setItem("skybook_current_user", JSON.stringify(currentUser));
-        
-        const userIndex = users.findIndex(usr => usr.email.toLowerCase() === u.email.toLowerCase());
-        if (userIndex !== -1) {
-            users[userIndex].role = "admin";
-            saveDbTable("skybook_users", users);
-        }
-        
-        modalLogin.classList.remove("active");
-        showNotification(`Авторизовано як адміністратор`, "success");
         updateAuthUI();
     });
 }
