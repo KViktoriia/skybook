@@ -300,9 +300,8 @@ const INIT_TRANSACTIONS = [
     { id: "tx_102", bookingId: "b2", amount: 2400, fraudScore: 22, status: "APPROVED", timestamp: "2026-06-06T14:19:50Z" }
 ];
 
-// URL-адреса єдиної хмарної бази даних (JSON Blob API)
-const DB_BLOB_URL = "https://jsonblob.com/api/jsonBlob/019ea6c3-6ee3-74f4-8636-f987cd1b03bb";
-const PROXY_DB_URL = "https://corsproxy.io/?url=" + encodeURIComponent(DB_BLOB_URL);
+// URL-адреса єдиної хмарної бази даних (KVdb.io)
+const DB_BLOB_URL = "https://kvdb.io/797Lb9grTLEF1nocaTgepi/db";
 
 // Завантаження/Ініціалізація даних з localStorage (як локальний кеш)
 function getDbTable(tableName, fallbackData) {
@@ -365,11 +364,10 @@ async function saveFullDatabaseToCloud() {
         transactions
     };
     try {
-        const response = await fetch(PROXY_DB_URL, {
+        const response = await fetch(DB_BLOB_URL, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(database)
         });
@@ -393,7 +391,7 @@ function saveDbTable(tableName, data) {
 // Завантаження найсвіжіших даних із хмари при старті
 async function loadDatabaseFromCloud() {
     try {
-        const response = await fetch(PROXY_DB_URL);
+        const response = await fetch(DB_BLOB_URL);
         if (!response.ok) throw new Error("Cloud DB GET failed");
         const cloudDb = await response.json();
         
@@ -793,10 +791,18 @@ btnDiiaAuth.addEventListener("click", () => {
         modalDiiaScan.classList.remove("active");
         
         // Автозаповнення форми
-        document.getElementById("pass-first-name").value = "Viktoriia";
-        document.getElementById("pass-last-name").value = "Kryvoruchko";
-        document.getElementById("pass-passport").value = "FT123456";
-        document.getElementById("pass-email").value = "v.kryvoruchko@skybook.ua";
+        if (currentUser) {
+            document.getElementById("pass-first-name").value = currentUser.firstName || "";
+            document.getElementById("pass-last-name").value = currentUser.lastName || "";
+            document.getElementById("pass-passport").value = currentUser.passport || "";
+            document.getElementById("pass-email").value = currentUser.email || "";
+        } else {
+            // Для гостя вставляємо дефолтні дані
+            document.getElementById("pass-first-name").value = "Дмитро";
+            document.getElementById("pass-last-name").value = "Шевченко";
+            document.getElementById("pass-passport").value = "ДІ987654";
+            document.getElementById("pass-email").value = "d.shevchenko@diia.gov.ua";
+        }
         
         showNotification("Дані паспорта успішно імпортовано через Дія API!", "success");
     }, 2200);
@@ -1020,9 +1026,150 @@ function openTicketModal(booking) {
 closeTicketModalBtn.addEventListener("click", () => ticketModal.classList.remove("active"));
 closeTicketViewBtn.addEventListener("click", () => ticketModal.classList.remove("active"));
 
+// Допоміжна функція для чистого друку або збереження квитка на мобільних пристроях
+function printTicketMobile(booking) {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+        window.print();
+        return;
+    }
+    
+    const ticketHtml = document.getElementById("boarding-pass-print-target").outerHTML;
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Квиток SkyBook - PNR: ${booking.pnr}</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    background: #f1f5f9;
+                    margin: 0;
+                    padding: 20px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                * {
+                    box-sizing: border-box;
+                }
+                .boarding-pass {
+                    background: #ffffff;
+                    color: #000000;
+                    border: 2px solid #000000;
+                    border-radius: 12px;
+                    width: 100%;
+                    max-width: 650px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                }
+                .boarding-pass-header {
+                    background: #f1f5f9;
+                    border-bottom: 2px dashed #000000;
+                    padding: 16px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .boarding-pass-body {
+                    padding: 20px;
+                    background: #ffffff;
+                }
+                .boarding-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 16px;
+                    margin-top: 20px;
+                }
+                .boarding-info-block {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .boarding-info-block label {
+                    font-size: 11px;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                }
+                .boarding-info-block span {
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #000000;
+                    margin-top: 4px;
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 4px 8px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    border-radius: 4px;
+                }
+                .badge-success {
+                    background: #dcfce7;
+                    color: #15803d;
+                }
+                .badge-warning {
+                    background: #fef3c7;
+                    color: #b45309;
+                }
+                .boarding-pass-footer {
+                    background: #f8fafc;
+                    border-top: 2px dashed #000000;
+                    padding: 16px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .ticket-qr {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                @media print {
+                    body {
+                        background: none;
+                        padding: 0;
+                    }
+                    .boarding-pass {
+                        box-shadow: none;
+                        border-radius: 0;
+                        max-width: 100%;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            \${ticketHtml}
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                    }, 500);
+                }
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
 printTicketBtn.addEventListener("click", () => {
-    // Симуляція відправки на друк / збереження PDF
-    window.print();
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        const pnrText = document.getElementById("ticket-pnr").innerText.replace("PNR: ", "").trim();
+        const booking = bookings.find(b => b.pnr === pnrText);
+        if (booking) {
+            printTicketMobile(booking);
+        } else {
+            window.print();
+        }
+    } else {
+        window.print();
+    }
 });
 
 // --- 10. Кабінет пасажира (Dashboard) ---
