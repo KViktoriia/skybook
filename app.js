@@ -302,6 +302,7 @@ const INIT_TRANSACTIONS = [
 
 // URL-адреса єдиної хмарної бази даних (JSON Blob API)
 const DB_BLOB_URL = "https://jsonblob.com/api/jsonBlob/019ea6c3-6ee3-74f4-8636-f987cd1b03bb";
+const PROXY_DB_URL = "https://corsproxy.io/?url=" + encodeURIComponent(DB_BLOB_URL);
 
 // Завантаження/Ініціалізація даних з localStorage (як локальний кеш)
 function getDbTable(tableName, fallbackData) {
@@ -364,7 +365,7 @@ async function saveFullDatabaseToCloud() {
         transactions
     };
     try {
-        const response = await fetch(DB_BLOB_URL, {
+        const response = await fetch(PROXY_DB_URL, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -392,7 +393,7 @@ function saveDbTable(tableName, data) {
 // Завантаження найсвіжіших даних із хмари при старті
 async function loadDatabaseFromCloud() {
     try {
-        const response = await fetch(DB_BLOB_URL);
+        const response = await fetch(PROXY_DB_URL);
         if (!response.ok) throw new Error("Cloud DB GET failed");
         const cloudDb = await response.json();
         
