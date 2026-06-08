@@ -1160,6 +1160,7 @@ select option {
     /* Hide everything on the page */
     #main-nav, 
     main.container, 
+    .notification-container,
     .modal-overlay:not(#modal-ticket), 
     #modal-ticket .modal-header,
     #modal-ticket .modal-close,
