@@ -1546,7 +1546,7 @@ function updateAuthUI() {
         const secretInput = document.getElementById("admin-secret-key");
 
         if (currentUser.role === "admin") {
-            if (statusText) statusText.innerText = "Ви авторизовані як адміністратор системи. Вам доступно: Керування рейсами, розкладом, БД.";
+            if (statusText) statusText.innerText = "Ви авторизовані як адміністратор системи. Вам доступно: Керування рейсами, розкладом, БД, скасування бронювань, моніторинг транзакцій та чорний список.";
             if (statusText) statusText.style.color = "var(--primary)";
             if (formWrapper) formWrapper.classList.add("hide");
             if (demoteWrapper) demoteWrapper.classList.remove("hide");
