@@ -1305,12 +1305,11 @@ function renderAdminDashboard() {
 
     if (currentUser.role === "admin") {
         if (addFlightSection) addFlightSection.classList.remove("hide");
-        if (bookingsSection) bookingsSection.classList.remove("hide");
-        if (securitySection) securitySection.classList.remove("hide");
+        if (bookingsSection) bookingsSection.classList.add("hide");
+        if (securitySection) securitySection.classList.add("hide");
         if (revenueCard) revenueCard.classList.remove("hide");
         if (splitLayout) {
-            splitLayout.style.display = ""; // grid за замовчуванням
-            splitLayout.style.gridTemplateColumns = ""; // скидаємо ad-hoc стилі
+            splitLayout.style.display = "block"; // Тільки одна картка
         }
         if (statsGrid) statsGrid.style.gridTemplateColumns = "";
     } else if (currentUser.role === "operator") {
