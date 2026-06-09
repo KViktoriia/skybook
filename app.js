@@ -350,9 +350,60 @@ const INIT_USERS = [
         passport: "AD999999",
         role: "admin",
         status: "Staff"
+    },
+    {
+        email: "support@skybook.ua",
+        password: "123",
+        firstName: "Taras",
+        lastName: "Operator",
+        passport: "OP111111",
+        role: "operator",
+        status: "Staff"
+    },
+    {
+        email: "security@skybook.ua",
+        password: "123",
+        firstName: "Ivan",
+        lastName: "Security",
+        passport: "SC222222",
+        role: "security",
+        status: "Staff"
     }
 ];
 let users = getDbTable("skybook_users", INIT_USERS);
+
+// Переконуємося, що нові користувачі є в списку, навіть якщо таблиця вже була ініціалізована в localStorage
+const requiredUsers = [
+    {
+        email: "support@skybook.ua",
+        password: "123",
+        firstName: "Taras",
+        lastName: "Operator",
+        passport: "OP111111",
+        role: "operator",
+        status: "Staff"
+    },
+    {
+        email: "security@skybook.ua",
+        password: "123",
+        firstName: "Ivan",
+        lastName: "Security",
+        passport: "SC222222",
+        role: "security",
+        status: "Staff"
+    }
+];
+
+let usersUpdated = false;
+requiredUsers.forEach(reqU => {
+    if (!users.some(u => u.email === reqU.email)) {
+        users.push(reqU);
+        usersUpdated = true;
+    }
+});
+if (usersUpdated) {
+    localStorage.setItem("skybook_users", JSON.stringify(users));
+}
 
 // Асинхронне збереження всієї бази даних у хмару
 async function saveFullDatabaseToCloud() {
@@ -1202,8 +1253,13 @@ adminAddFlightForm.addEventListener("submit", (e) => {
 
 function renderAdminDashboard() {
     // 1. Оновлення статистики
-    document.getElementById("admin-stat-flights").innerText = flights.length;
-    document.getElementById("admin-stat-bookings").innerText = bookings.length;
+    const adminStatFlights = document.getElementById("admin-stat-flights");
+    const adminStatBookings = document.getElementById("admin-stat-bookings");
+    const adminStatRevenue = document.getElementById("admin-stat-revenue");
+    const adminStatOccupancy = document.getElementById("admin-stat-occupancy");
+
+    if (adminStatFlights) adminStatFlights.innerText = flights.length;
+    if (adminStatBookings) adminStatBookings.innerText = bookings.length;
     
     // Рахуємо прибуток (APPROVED транзакції)
     const totalRev = transactions
@@ -1214,7 +1270,7 @@ function renderAdminDashboard() {
         .filter(t => t.status === "REFUNDED")
         .reduce((sum, t) => sum + Math.abs(t.amount), 0);
         
-    document.getElementById("admin-stat-revenue").innerText = `${(totalRev - totalRefunded).toLocaleString()} грн`;
+    if (adminStatRevenue) adminStatRevenue.innerText = `${(totalRev - totalRefunded).toLocaleString()} грн`;
     
     // Середнє заповнення
     let totalCap = 0;
@@ -1224,38 +1280,153 @@ function renderAdminDashboard() {
         totalBooked += f.bookedSeats.length;
     });
     const avgOcc = totalCap > 0 ? Math.round((totalBooked / totalCap) * 100) : 0;
-    document.getElementById("admin-stat-occupancy").innerText = `${avgOcc}%`;
+    if (adminStatOccupancy) adminStatOccupancy.innerText = `${avgOcc}%`;
 
-    // 2. Рендеринг таблиці останніх бронювань
-    adminBookingsTable.innerHTML = "";
-    if (bookings.length === 0) {
-        adminBookingsTable.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">База даних порожня</td></tr>`;
-        return;
+    // Керування видимістю секцій відповідно до ролі
+    const addFlightSection = document.getElementById("admin-add-flight-section");
+    const bookingsSection = document.getElementById("admin-bookings-section");
+    const securitySection = document.getElementById("admin-security-section");
+    const revenueCard = document.getElementById("admin-revenue-card");
+    const splitLayout = document.querySelector("#view-admin .split-layout");
+    const statsGrid = document.querySelector(".admin-stats-grid");
+
+    if (currentUser.role === "admin") {
+        if (addFlightSection) addFlightSection.classList.remove("hide");
+        if (bookingsSection) bookingsSection.classList.remove("hide");
+        if (securitySection) securitySection.classList.remove("hide");
+        if (revenueCard) revenueCard.classList.remove("hide");
+        if (splitLayout) {
+            splitLayout.style.display = ""; // grid за замовчуванням
+            splitLayout.style.gridTemplateColumns = ""; // скидаємо ad-hoc стилі
+        }
+        if (statsGrid) statsGrid.style.gridTemplateColumns = "";
+    } else if (currentUser.role === "operator") {
+        if (addFlightSection) addFlightSection.classList.add("hide");
+        if (bookingsSection) bookingsSection.classList.remove("hide");
+        if (securitySection) securitySection.classList.add("hide");
+        if (revenueCard) revenueCard.classList.add("hide");
+        if (splitLayout) {
+            splitLayout.style.display = "block"; // Одинарна колонка
+        }
+        if (statsGrid) {
+            statsGrid.style.gridTemplateColumns = window.innerWidth >= 992 ? "repeat(3, 1fr)" : "";
+        }
+    } else if (currentUser.role === "security") {
+        if (addFlightSection) addFlightSection.classList.add("hide");
+        if (bookingsSection) bookingsSection.classList.add("hide");
+        if (securitySection) securitySection.classList.remove("hide");
+        if (revenueCard) revenueCard.classList.add("hide");
+        if (splitLayout) {
+            splitLayout.style.display = "block"; // Одинарна колонка
+        }
+        if (statsGrid) {
+            statsGrid.style.gridTemplateColumns = window.innerWidth >= 992 ? "repeat(3, 1fr)" : "";
+        }
     }
 
-    bookings.forEach(b => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>
-                <span style="font-weight:600;">${b.flightNumber}</span><br>
-                <span style="font-size:11px; color:var(--text-secondary);">${b.passengerFirstName} ${b.passengerLastName}</span>
-            </td>
-            <td style="font-weight: 700; color: var(--primary);">${b.seatNumber}</td>
-            <td>
-                <span class="badge ${b.status === 'PAID' ? 'badge-success' : 'badge-danger'}">
-                    ${b.status === 'PAID' ? 'Оплачено' : 'Скасовано'}
-                </span>
-            </td>
-            <td>
-                ${b.status === 'PAID' ? `
-                    <button class="btn btn-secondary" onclick="adminCancelBooking('${b.id}')" style="padding: 4px 8px; font-size:11px;">
-                        Анулювати
-                    </button>
-                ` : '<span style="color:var(--text-muted); font-size:11px;">Неактивно</span>'}
-            </td>
-        `;
-        adminBookingsTable.appendChild(row);
-    });
+    // 2. Рендеринг таблиці останніх бронювань (якщо видима)
+    if (bookingsSection && !bookingsSection.classList.contains("hide")) {
+        adminBookingsTable.innerHTML = "";
+        if (bookings.length === 0) {
+            adminBookingsTable.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">База даних порожня</td></tr>`;
+        } else {
+            bookings.forEach(b => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>
+                        <span style="font-weight:600;">${b.flightNumber}</span><br>
+                        <span style="font-size:11px; color:var(--text-secondary);">${b.passengerFirstName} ${b.passengerLastName}</span>
+                    </td>
+                    <td style="font-weight: 700; color: var(--primary);">${b.seatNumber}</td>
+                    <td>
+                        <span class="badge ${b.status === 'PAID' ? 'badge-success' : 'badge-danger'}">
+                            ${b.status === 'PAID' ? 'Оплачено' : 'Скасовано'}
+                        </span>
+                    </td>
+                    <td>
+                        ${b.status === 'PAID' ? `
+                            <button class="btn btn-secondary" onclick="adminCancelBooking('${b.id}')" style="padding: 4px 8px; font-size:11px;">
+                                Анулювати
+                            </button>
+                        ` : '<span style="color:var(--text-muted); font-size:11px;">Неактивно</span>'}
+                    </td>
+                `;
+                adminBookingsTable.appendChild(row);
+            });
+        }
+    }
+
+    // 3. Рендеринг монітора безпеки (якщо видимий)
+    if (securitySection && !securitySection.classList.contains("hide")) {
+        // Рендеринг повзунка
+        const thresholdRange = document.getElementById("admin-threshold-range");
+        const thresholdVal = document.getElementById("admin-threshold-val");
+        if (thresholdRange && thresholdVal) {
+            thresholdRange.value = fraudThreshold;
+            thresholdVal.innerText = fraudThreshold + "%";
+        }
+
+        // Рендеринг транзакцій
+        const transactionsTable = document.getElementById("admin-transactions-table-body");
+        if (transactionsTable) {
+            transactionsTable.innerHTML = "";
+            if (transactions.length === 0) {
+                transactionsTable.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Немає транзакцій</td></tr>`;
+            } else {
+                transactions.forEach(tx => {
+                    const b = bookings.find(x => x.id === tx.bookingId);
+                    const passengerName = b ? `${b.passengerFirstName} ${b.passengerLastName}` : "Гість";
+                    const cardMask = "•••• " + (b && b.seatNumber ? "4321" : "1111");
+                    
+                    let scoreColor = "var(--accent-emerald)";
+                    if (tx.fraudScore > 60) scoreColor = "var(--accent-rose)";
+                    else if (tx.fraudScore > 30) scoreColor = "var(--accent-amber)";
+                    
+                    let statusBadgeClass = "badge-success";
+                    let statusText = "Схвалено";
+                    if (tx.status === "BLOCKED") {
+                        statusBadgeClass = "badge-danger";
+                        statusText = "Блоковано";
+                    } else if (tx.status === "REFUNDED") {
+                        statusBadgeClass = "badge-warning";
+                        statusText = "Повернено";
+                    }
+
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td><span style="font-weight:600;">${tx.id}</span></td>
+                        <td>
+                            <span style="font-size:13px;">${passengerName}</span><br>
+                            <span style="font-size:11px; color:var(--text-secondary);">${cardMask}</span>
+                        </td>
+                        <td style="font-weight:600;">${tx.amount.toLocaleString()} грн</td>
+                        <td style="font-weight:700; color:${scoreColor};">${tx.fraudScore}%</td>
+                        <td><span class="badge ${statusBadgeClass}">${statusText}</span></td>
+                    `;
+                    transactionsTable.appendChild(row);
+                });
+            }
+        }
+
+        // Рендеринг чорного списку
+        const blacklistTable = document.getElementById("admin-blacklist-table-body");
+        if (blacklistTable) {
+            blacklistTable.innerHTML = "";
+            if (blacklist.length === 0) {
+                blacklistTable.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Чорний список порожній</td></tr>`;
+            } else {
+                blacklist.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td style="font-family: monospace; font-weight: 600;">${item.id}</td>
+                        <td><span class="badge badge-warning">${item.type}</span></td>
+                        <td style="font-size: 12px; color: var(--text-secondary);">${item.reason}</td>
+                    `;
+                    blacklistTable.appendChild(row);
+                });
+            }
+        }
+    }
 }
 
 function adminCancelBooking(bookingId) {
@@ -1342,12 +1513,14 @@ function updateAuthUI() {
         
         let roleName = "Пасажир";
         if (currentUser.role === "admin") roleName = "Адмін";
+        else if (currentUser.role === "operator") roleName = "Підтримка";
+        else if (currentUser.role === "security") roleName = "Безпека";
         navUserBadge.innerText = roleName;
         
         navItemSearch.classList.remove("hide");
         navItemDashboard.classList.remove("hide"); // Завжди показуємо кабінет авторизованому пасажиру або адміну
         
-        if (currentUser.role === "admin") {
+        if (currentUser.role === "admin" || currentUser.role === "operator" || currentUser.role === "security") {
             navItemAdmin.classList.remove("hide");
         } else {
             navItemAdmin.classList.add("hide");
@@ -1365,6 +1538,16 @@ function updateAuthUI() {
             if (formWrapper) formWrapper.classList.add("hide");
             if (demoteWrapper) demoteWrapper.classList.remove("hide");
             if (secretInput) secretInput.value = "";
+        } else if (currentUser.role === "operator") {
+            if (statusText) statusText.innerText = "Ви авторизовані як оператор підтримки. Вам доступні функції перегляду та скасування бронювань.";
+            if (statusText) statusText.style.color = "var(--accent-emerald)";
+            if (formWrapper) formWrapper.classList.add("hide");
+            if (demoteWrapper) demoteWrapper.classList.add("hide");
+        } else if (currentUser.role === "security") {
+            if (statusText) statusText.innerText = "Ви авторизовані як спеціаліст з авіабезпеки. Вам доступний моніторинг транзакцій та чорний список.";
+            if (statusText) statusText.style.color = "var(--primary)";
+            if (formWrapper) formWrapper.classList.add("hide");
+            if (demoteWrapper) demoteWrapper.classList.add("hide");
         } else {
             if (statusText) statusText.innerText = "Ви авторизовані як пасажир. Для доступу до керування рейсами та перегляду звітності активуйте режим адміністратора.";
             if (statusText) statusText.style.color = "var(--text-secondary)";
@@ -1557,6 +1740,26 @@ currentSearch.destination = "CDG";
 currentSearch.date = today;
 renderFlights();
 updateAuthUI();
+
+// Слухачі для безпеки та адаптивного дизайну (Лабораторні 11-12)
+window.addEventListener("resize", () => {
+    const activeBtn = document.querySelector(".nav-menu .nav-item.active button");
+    if (activeBtn && activeBtn.getAttribute("aria-controls") === "view-admin") {
+        renderAdminDashboard();
+    }
+});
+
+document.addEventListener("input", (e) => {
+    if (e.target && e.target.id === "admin-threshold-range") {
+        const val = parseInt(e.target.value);
+        fraudThreshold = val;
+        localStorage.setItem("skybook_fraud_threshold", val.toString());
+        const display = document.getElementById("admin-threshold-val");
+        if (display) {
+            display.innerText = val + "%";
+        }
+    }
+});
 
 // --- 15. Логіка вікна Про компанію та Контакти (Footer Info Modals) ---
 const modalInfo = document.getElementById("modal-info");

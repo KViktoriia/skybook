@@ -213,7 +213,7 @@
                         <h2 id="admin-stat-bookings">48</h2>
                     </div>
                 </div>
-                <div class="glass-card stat-card">
+                <div class="glass-card stat-card" id="admin-revenue-card">
                     <div class="stat-icon success">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </div>
@@ -235,7 +235,7 @@
 
             <div class="split-layout">
                 <!-- Створення нового рейсу (Лабораторні 5, 11-12) -->
-                <div class="glass-card">
+                <div class="glass-card" id="admin-add-flight-section">
                     <h3 style="margin-bottom: 20px;">Додати новий рейс</h3>
                     <form id="admin-add-flight-form" class="flight-form">
                         <div class="form-group">
@@ -263,7 +263,7 @@
                                 <option value="WAW">Варшава (WAW)</option>
                                 <option value="CDG">Париж (CDG)</option>
                                 <option value="LHR">Лондон (LHR)</option>
-                                <option value="FRA">Франкфурт (FRA)</option>
+                                <option value="FRA">Франкфукт (FRA)</option>
                                 <option value="IST">Стамбул (IST)</option>
                                 <option value="MAD">Мадрид (MAD)</option>
                                 <option value="FCO">Рим (FCO)</option>
@@ -299,7 +299,7 @@
                 </div>
 
                 <!-- Список поточних бронювань (База даних CRUD) -->
-                <div class="glass-card">
+                <div class="glass-card" id="admin-bookings-section">
                     <h3 style="margin-bottom: 20px;">База даних: Останні бронювання</h3>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;">Прямий перегляд таблиці `bookings` з бази даних. Підтримується скасування.</p>
                     <div class="table-container">
@@ -316,6 +316,66 @@
                                 <!-- Рендериться через JS -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Монітор системи безпеки (Лабораторна 11-12) -->
+            <div id="admin-security-section" class="glass-card" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 20px;">Монітор системи безпеки (Лабораторна 11-12)</h3>
+                
+                <!-- Fraud Threshold Slider -->
+                <div style="margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+                    <div>
+                        <label for="admin-threshold-range" style="font-weight: 500; font-size: 15px; margin-bottom: 5px; display: block;">Поріг блокування підозрілих транзакцій (Fraud Score):</label>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Транзакції з рівнем ризику вище цього порогу автоматично блокуються.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <input type="range" id="admin-threshold-range" min="10" max="100" value="75" style="width: 200px; accent-color: var(--primary);">
+                        <span id="admin-threshold-val" style="font-size: 20px; font-weight: bold; color: var(--primary); width: 45px; text-align: right;">75%</span>
+                    </div>
+                </div>
+
+                <!-- Two-Column Layout for logs & blacklist -->
+                <div class="split-layout" style="margin-top: 20px; grid-template-columns: 1.2fr 0.8fr;">
+                    <!-- Журнал транзакцій -->
+                    <div>
+                        <h4 style="margin-bottom: 12px; font-size: 16px;">Журнал транзакцій (Аналіз ризику платіжних даних)</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Транзакція</th>
+                                        <th>Пасажир / Картка</th>
+                                        <th>Сума</th>
+                                        <th>Ризик</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-transactions-table-body">
+                                    <!-- Рендериться через JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Чорний список реквізитів -->
+                    <div>
+                        <h4 style="margin-bottom: 12px; font-size: 16px;">Чорний список (Blacklist)</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Реквізит (Паспорт/Картка)</th>
+                                        <th>Тип</th>
+                                        <th>Причина</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-blacklist-table-body">
+                                    <!-- Рендериться через JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
