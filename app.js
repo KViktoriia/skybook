@@ -453,11 +453,24 @@ async function loadDatabaseFromCloud() {
             transactions = cloudDb.transactions;
             if (cloudDb.blacklist) blacklist = cloudDb.blacklist;
             
+            // Переконуємося, що нові користувачі є в списку, навіть після завантаження з хмари
+            let cloudUsersUpdated = false;
+            requiredUsers.forEach(reqU => {
+                if (!users.some(u => u.email.toLowerCase() === reqU.email.toLowerCase())) {
+                    users.push(reqU);
+                    cloudUsersUpdated = true;
+                }
+            });
+            
             localStorage.setItem("skybook_users", JSON.stringify(users));
             localStorage.setItem("skybook_flights", JSON.stringify(flights));
             localStorage.setItem("skybook_bookings", JSON.stringify(bookings));
             localStorage.setItem("skybook_transactions", JSON.stringify(transactions));
             localStorage.setItem("skybook_blacklist", JSON.stringify(blacklist));
+            
+            if (cloudUsersUpdated) {
+                saveFullDatabaseToCloud();
+            }
             
             // Якщо сесія активна, оновлюємо поточного користувача за поштою (на випадок зміни паролю/ролі)
             if (currentUser) {
