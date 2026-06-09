@@ -1546,7 +1546,7 @@ function updateAuthUI() {
         const secretInput = document.getElementById("admin-secret-key");
 
         if (currentUser.role === "admin") {
-            if (statusText) statusText.innerText = "Ви авторизовані як адміністратор системи. Вам доступні панель адміністрування та керування релізом.";
+            if (statusText) statusText.innerText = "Ви авторизовані як адміністратор системи. Вам доступно: Керування рейсами, розкладом, БД.";
             if (statusText) statusText.style.color = "var(--primary)";
             if (formWrapper) formWrapper.classList.add("hide");
             if (demoteWrapper) demoteWrapper.classList.remove("hide");
@@ -1754,7 +1754,7 @@ currentSearch.date = today;
 renderFlights();
 updateAuthUI();
 
-// Слухачі для безпеки та адаптивного дизайну (Лабораторні 11-12)
+// Слухачі для безпеки та адаптивного дизайну
 window.addEventListener("resize", () => {
     const activeBtn = document.querySelector(".nav-menu .nav-item.active button");
     if (activeBtn && activeBtn.getAttribute("aria-controls") === "view-admin") {
