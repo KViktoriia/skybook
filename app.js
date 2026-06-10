@@ -891,11 +891,30 @@ passengerForm.addEventListener("submit", (e) => {
         return;
     }
     
+    const firstName = document.getElementById("pass-first-name").value.trim();
+    const lastName = document.getElementById("pass-last-name").value.trim();
+    const passport = document.getElementById("pass-passport").value.trim();
+    const email = document.getElementById("pass-email").value.trim();
+    
+    // Валідація паспорта (2 літери + 6 цифр, або 9 цифр)
+    const passportRegex = /^[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ]{2}\d{6}$|^\d{9}$/;
+    if (!passportRegex.test(passport)) {
+        showNotification("Серія/номер паспорта має містити 2 літери та 6 цифр (наприклад, AB123456) або 9 цифр (ID-картка)!", "warning");
+        return;
+    }
+    
+    // Валідація формату електронної пошти
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+        showNotification("Будь ласка, вкажіть коректну електронну пошту!", "warning");
+        return;
+    }
+    
     activeBookingSession.passengerDetails = {
-        firstName: document.getElementById("pass-first-name").value,
-        lastName: document.getElementById("pass-last-name").value,
-        passport: document.getElementById("pass-passport").value,
-        email: document.getElementById("pass-email").value
+        firstName,
+        lastName,
+        passport,
+        email
     };
     
     // Закриваємо вибір місця і відкриваємо оплату
@@ -940,6 +959,11 @@ document.getElementById("card-expiry").addEventListener("input", (e) => {
     } else {
         e.target.value = val;
     }
+});
+
+// Дозволяти вводити лише букви, пробіли та дефіси для імені власника карти
+document.getElementById("card-holder").addEventListener("input", (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ\s-]/g, "");
 });
 
 paymentCardForm.addEventListener("submit", (e) => {
@@ -1637,6 +1661,13 @@ if (loginForm) {
         const email = document.getElementById("login-email").value.trim().toLowerCase();
         const pass = document.getElementById("login-password").value;
         
+        // Валідація електронної пошти
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|skybook\.ua)$/;
+        if (!emailRegex.test(email)) {
+            showNotification("Вхід дозволено лише для адрес @gmail.com та @skybook.ua!", "warning");
+            return;
+        }
+        
         const u = users.find(usr => usr.email.toLowerCase() === email && usr.password === pass);
         if (u) {
             currentUser = u;
@@ -1662,6 +1693,20 @@ if (registerForm) {
         const email = document.getElementById("reg-email").value.trim().toLowerCase();
         const pass = document.getElementById("reg-password").value;
         const passConfirm = document.getElementById("reg-password-confirm").value;
+        
+        // Валідація електронної пошти
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|skybook\.ua)$/;
+        if (!emailRegex.test(email)) {
+            showNotification("Реєстрація дозволена лише для адрес @gmail.com та @skybook.ua!", "warning");
+            return;
+        }
+
+        // Валідація паспорта (2 літери + 6 цифр, або 9 цифр)
+        const passportRegex = /^[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ]{2}\d{6}$|^\d{9}$/;
+        if (!passportRegex.test(passport)) {
+            showNotification("Серія/номер паспорта має містити 2 літери та 6 цифр (наприклад, AB123456) або 9 цифр (ID-картка)!", "warning");
+            return;
+        }
         
         if (pass !== passConfirm) {
             showNotification("Паролі не співпадають!", "danger");
