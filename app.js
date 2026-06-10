@@ -966,6 +966,21 @@ document.getElementById("card-holder").addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ\s-]/g, "");
 });
 
+// Дозволяти вводити лише літери та цифри для паспорта, обмежуючи довжину до 9 символів
+const handlePassportInput = (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ0-9]/g, "").substring(0, 9);
+};
+
+const passPassportInput = document.getElementById("pass-passport");
+if (passPassportInput) {
+    passPassportInput.addEventListener("input", handlePassportInput);
+}
+
+const regPassportInput = document.getElementById("reg-passport");
+if (regPassportInput) {
+    regPassportInput.addEventListener("input", handlePassportInput);
+}
+
 paymentCardForm.addEventListener("submit", (e) => {
     e.preventDefault();
     
